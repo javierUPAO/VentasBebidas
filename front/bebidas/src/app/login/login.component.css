@@ -1,0 +1,27 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+}
+
+.login-card {
+  width: 320px;
+  background: #e0e0e0;
+  border-radius: 15px;
+  padding: 25px;
+}
+
+.btn-danger {
+  background-color: #a20008;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #3c0508;
+}
+
+.form-label {
+  font-weight: bold;
+}

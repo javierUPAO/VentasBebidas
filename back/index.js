@@ -1,11 +1,14 @@
 const { ApolloServer, gql } = require("apollo-server");
 const { db } = require("./firestoreConection");
+const admin = require("firebase-admin");
 const typeDefs = gql`
   type Bebida {
     id: ID!
     brand: String!
     type: BeverageType!
     sales: Int!
+    count: Int!
+    month: String!
   }
 
   type UpdateResponse {
@@ -31,15 +34,30 @@ const typeDefs = gql`
   input BebidaInput {
     brand: String!
     type: BeverageType!
-    sales: Int!
+    sales: Int = 0
+    count: Int = 0
+    month: String! = "2026-01"
   }
 
-  input BebidaUpdateInput {
+  input UpdateInput {
     brand: String
     type: BeverageType
     sales: Int
+    count: Int
+    month: String
   }
 
+  input SaleInput {
+    count: Int!
+    sales: Int!
+  }
+
+  type SaleResponse {
+    code: Int!
+    message: String!
+    succes: Boolean!
+    bebida: Bebida
+  }
   enum BeverageType {
     WATER
     COLA
@@ -69,7 +87,9 @@ const typeDefs = gql`
 
     deleteBebida(id: ID!): DeleteResponse
 
-    updateBebida(id: ID!, input: BebidaUpdateInput!): UpdateResponse
+    updateBebida(id: ID!, input: UpdateInput!): UpdateResponse
+
+    addSale(id: ID!, input: SaleInput): SaleResponse
   }
 `;
 
@@ -119,6 +139,8 @@ const resolvers = {
           brand: input.brand,
           type: input.type,
           sales: input.sales,
+          count: input.count,
+          month: input.month,
         };
 
         await ref.set({
@@ -126,6 +148,8 @@ const resolvers = {
           brand: bebida.brand,
           type: bebida.type,
           sales: bebida.sales,
+          count: bebida.count,
+          month: bebida.month,
         });
 
         return {
@@ -189,6 +213,8 @@ const resolvers = {
           ...(input.brand && { brand: input.brand }),
           ...(input.type && { type: input.type }),
           ...(input.sales !== undefined && { sales: input.sales }),
+          ...(input.count !== undefined && { count: input.count }),
+          ...(input.month !== undefined && { month: input.month }),
         });
 
         const updated = await ref.get();
@@ -206,6 +232,41 @@ const resolvers = {
         return {
           code: 200,
           message: "Error al actualizar bebida ",
+          succes: false,
+          bebida: null,
+        };
+      }
+    },
+    addSale: async (_, { id, input }) => {
+      try {
+        const ref = db.collection("bebidas").doc(id);
+        let salesToAdd = 0;
+        let countToAdd = 1;
+
+        if (typeof input.sales === "number") {
+          salesToAdd = input.sales;
+        }
+
+        if (typeof input.count === "number" && input.count > 0) {
+          countToAdd = input.count;
+        }
+        await ref.update({
+          sales: admin.firestore.FieldValue.increment(salesToAdd),
+          count: admin.firestore.FieldValue.increment(countToAdd),
+        });
+
+        const snap = await ref.get();
+
+        return {
+          code: 200,
+          succes: true,
+          message: "Venta registrada",
+          bebida: snap.data(),
+        };
+      } catch (error) {
+        return {
+          code: 500,
+          message: "Error al registrar la venta " + error,
           succes: false,
           bebida: null,
         };

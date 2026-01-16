@@ -1,0 +1,52 @@
+<div class="login-wrapper">
+  <div class="login-card shadow">
+    <h4 class="text-center mb-4">
+      <u>Iniciar sesión</u>
+    </h4>
+
+    <form (ngSubmit)="login()">
+      <div class="mb-3">
+        <label class="form-label">Correo :</label>
+        <input
+          type="email"
+          class="form-control"
+          [(ngModel)]="email"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Contraseña :</label>
+        <input
+          type="password"
+          class="form-control"
+          [(ngModel)]="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <div class="text-end mb-3">
+        <small>
+          ¿Olvidaste la contraseña?
+          <a class="text-danger">Restablecer</a>
+        </small>
+      </div>
+
+      <div class="d-grid">
+        <button
+          class="btn btn-danger rounded-pill"
+          type="submit"
+          [disabled]="loading"
+        >
+          {{ loading ? "Ingresando..." : "Continuar" }}
+        </button>
+      </div>
+
+      <p *ngIf="error" class="text-danger mt-3 text-center">
+        {{ error }}
+      </p>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,176 @@
+<nav class="navbar navBackground">
+  <div class="container-fluid">
+    <button class="btn cerrarbtn ms-auto" (click)="logout()" type="button">
+      Salir
+    </button>
+  </div>
+</nav>
+<div class="container">
+  <div class="row mt-4 mb-4">
+    <div class="col-4 mt-4 mb-4">
+      <h2 class="text-decoration-underline link-underline-dark fs-1">
+        Filtrar
+      </h2>
+      <!-- Tipo Bebida -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Tipo Bebida</label>
+        <select
+          class="form-select"
+          [(ngModel)]="tipoBebida"
+          (change)="onTipoChange($event.target.value)"
+        >
+          <option value="Todas">Todas</option>
+          <option value="Aguas">Aguas</option>
+          <option value="Gaseosas">Gaseosas</option>
+        </select>
+      </div>
+
+      <!-- Marca (jerárquico) -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Marca</label>
+        <select
+          class="form-select"
+          [(ngModel)]="marca"
+          (change)="onMarcaChange($event.target.value)"
+        >
+          >
+          <option value="Todas">Todas</option>
+          <option *ngFor="let m of marcasDisponibles" [value]="m">
+            {{ m }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="col-8 mt-4 mb-4">
+      <h4 class="text-center mb-3 fs-2">Ventas por Marca y Tipo</h4>
+      <div id="container" style="height: 400px"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4 mb-3">
+      <div class="row mb-3">
+        <div class="h2">Ventas Totales : {{ total }}</div>
+      </div>
+      <div class="row mb-3">
+        <div class="h2">Total Registros :{{ cantidad }}</div>
+      </div>
+    </div>
+    <div class="col-8">
+      <div class="table-responsive">
+        <table
+          class="table table-striped table-hover table-borderless align-middle"
+        >
+          <thead class="table-light">
+            <tr class="text-center">
+              <th>#</th>
+              <th>Marca</th>
+              <th>Tipo</th>
+              <th>Meta</th>
+              <th>Ventas</th>
+              <th>Cantidad</th>
+              <th>Fecha</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            <tr class="" *ngFor="let bebida of datos; let i = index">
+              <td scope="row">{{ i + 1 }}</td>
+
+              <td class="text-center">{{ bebida.brand }}</td>
+              <td class="text-center">{{ bebida.type }}</td>
+              <td></td>
+              <td class="text-center">
+                <ng-container *ngIf="bebida.isNew; else normalSales">
+                  <input
+                    type="number"
+                    class="form-control new-row"
+                    [(ngModel)]="bebida.sales"
+                    required
+                  />
+                </ng-container>
+                <ng-template #normalSales>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="bebida.sales"
+                    (focus)="onFocus(bebida, 'sales')"
+                    (blur)="onBlur(bebida, 'sales')"
+                    (keydown.enter)="onEnter($event, bebida, 'sales')"
+                  />
+                </ng-template>
+              </td>
+              <td>
+                <ng-container *ngIf="bebida.isNew; else normalCount">
+                  <input
+                    type="number"
+                    class="form-control new-row"
+                    [(ngModel)]="bebida.count"
+                    required
+                  />
+                </ng-container>
+                <ng-template #normalCount>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="bebida.count"
+                    (focus)="onFocus(bebida, 'count')"
+                    (blur)="onBlur(bebida, 'count')"
+                    (keydown.enter)="onEnter($event, bebida, 'count')"
+                  />
+                </ng-template>
+              </td>
+
+              <td>
+                <ng-container *ngIf="bebida.isNew; else normalMonth">
+                  <input
+                    class="form-control new-row"
+                    [(ngModel)]="bebida.month"
+                    placeholder="YYYY/MM"
+                    (keydown.enter)="onCreateEnter($event, bebida)"
+                    required
+                  />
+                </ng-container>
+
+                <ng-template #normalMonth>
+                  <input
+                    class="form-control"
+                    [(ngModel)]="bebida.month"
+                    (focus)="onFocus(bebida, 'month')"
+                    (blur)="onBlur(bebida, 'month')"
+                    (keydown.enter)="onEnter($event, bebida, 'month')"
+                  />
+                </ng-template>
+              </td>
+              <td class="pruebahover">
+                <button class="add-btn" (click)="addRow(bebida, i)">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="icon"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="datos.length === 0">
+              <td colspan="5" class="text-center">
+                No hay bebidas para mostrar
+              </td>
+            </tr>
+          </tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

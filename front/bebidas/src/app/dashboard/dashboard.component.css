@@ -1,0 +1,44 @@
+.cerrarbtn {
+  background-color: white;
+  font-weight: bold;
+  color: #3a3a3a;
+  min-width: 153px;
+}
+
+.navBackground {
+  background: #3a3a3a;
+}
+.form-control {
+  background-color: transparent;
+  border: none;
+  text-align: center;
+}
+.text-center {
+  text-align: center;
+}
+
+.add-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  padding: 0;
+}
+
+.icon {
+  width: 25px;
+  height: 50px;
+  color: #25c457; /* gray-400 */
+}
+
+.pruebahover:hover .add-btn {
+  opacity: 1;
+}
+.pruebahover {
+  display: flex;
+  justify-items: center;
+}
+
+.new-row {
+  background-color: bisque;
+}

@@ -5,6 +5,9 @@ import { Router } from '@angular/router';
 import { BebidasService } from '../services/bebidas.service';
 import { UpdateRequest } from '../models/update';
 import { Bebida } from '../models/bebida';
+import { ToastService } from '../services/toast.service';
+
+declare const bootstrap: any;
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -17,10 +20,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   total: number = 0;
   cantidad: number = 0;
   pendingUpdates = new Set<string>();
+  deleteId!: string;
+  modal!: any;
   constructor(
     private auth: FirebaseAuthService,
     private router: Router,
-    private bebidasService: BebidasService
+    private bebidasService: BebidasService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {}
@@ -84,8 +90,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   mapTipo(tipo: string) {
-    if (tipo === 'Aguas') return 'WATER';
-    if (tipo === 'Gaseosas') return 'COLA';
+    if (tipo === 'Aguas') return 'Agua';
+    if (tipo === 'Gaseosas') return 'Gaseosa';
     return null;
   }
 
@@ -169,14 +175,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     console.log(input);
     this.bebidasService.actualizarBebida(bebida.id, input).subscribe({
       next: () => {
-        this.crearGrafico(this.datos);
+        this.cargarDatos();
       },
       error: () => {
         bebida[field] = original;
       },
       complete: () => {
         this.pendingUpdates.delete(key);
-        this.crearGrafico(this.datos);
+        this.cargarDatos();
       },
     });
   }
@@ -189,10 +195,46 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       count: undefined,
       month: '',
       isNew: true,
+      mode: 'inline',
     };
 
     this.datos.splice(index + 1, 0, newRow);
   }
+
+  addfirstRow() {
+    const newRow: Bebida = {
+      brand: '',
+      type: '',
+      sales: undefined,
+      count: undefined,
+      month: '',
+      isNew: true,
+      mode: 'first',
+    };
+
+    this.datos = [newRow];
+  }
+
+  openDeleteModal(id: string) {
+    this.deleteId = id;
+    const modalEl = document.getElementById('deleteModal');
+    this.modal = new bootstrap.Modal(modalEl);
+    this.modal.show();
+  }
+
+  confirmDelete() {
+    this.bebidasService.borrarBebida(this.deleteId).subscribe({
+      next: (res: any) => {
+        this.modal.hide();
+        this.cargarDatos();
+        this.toast.show(res.data.deleteBebida.message, 'success');
+      },
+      error: (err) => {
+        this.toast.show('Error al eliminar bebida', 'error');
+      },
+    });
+  }
+
   checkCreate(bebida: Bebida) {
     if (bebida.sales == null || bebida.count == null || !bebida.month) {
       return;
@@ -211,7 +253,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.bebidasService.crearBebida(input).subscribe({
       next: () => {
         bebida.isNew = false;
-        this.crearGrafico(this.datos);
+        this.cargarDatos();
       },
       error: () => {
         console.error('Error al crear bebida');
@@ -227,5 +269,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   onCreateEnter(event: KeyboardEvent, bebida: Bebida) {
     event.preventDefault();
     this.checkCreate(bebida);
+  }
+
+  onCancelCreate(bebida: Bebida, event?: KeyboardEvent) {
+    event?.preventDefault();
+
+    if (bebida.isNew) {
+      this.datos = this.datos.filter((b) => b !== bebida);
+    }
   }
 }

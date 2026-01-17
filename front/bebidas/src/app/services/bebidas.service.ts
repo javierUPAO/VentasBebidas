@@ -107,4 +107,16 @@ query Bebidas(
       variables: { input },
     });
   }
+
+  borrarBebida(deleteBebidaId: any) {
+    const query = `mutation Mutation($deleteBebidaId: ID!) {
+                    deleteBebida(id: $deleteBebidaId) {
+                      message
+                    }
+                    }`;
+    return this.http.post<number>(this.url, {
+      query,
+      variables: { deleteBebidaId },
+    });
+  }
 }

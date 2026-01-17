@@ -59,8 +59,8 @@ const typeDefs = gql`
     bebida: Bebida
   }
   enum BeverageType {
-    WATER
-    COLA
+    Agua
+    Gaseosa
   }
   enum Sort {
     BRAND

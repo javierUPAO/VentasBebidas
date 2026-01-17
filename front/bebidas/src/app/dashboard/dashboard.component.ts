@@ -22,11 +22,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   pendingUpdates = new Set<string>();
   deleteId!: string;
   modal!: any;
+  once: boolean;
   constructor(
     private auth: FirebaseAuthService,
     private router: Router,
     private bebidasService: BebidasService,
-    private toast: ToastService
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {}
@@ -59,6 +60,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.cantidad = res.data.bebidas.cantidad;
       this.crearGrafico(this.datos);
     });
+    this.once = true;
   }
 
   crearGrafico(data: any[]): void {
@@ -188,17 +190,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   addRow(bebida: Bebida, index: number) {
-    const newRow: Bebida = {
-      brand: bebida.brand,
-      type: bebida.type,
-      sales: undefined,
-      count: undefined,
-      month: '',
-      isNew: true,
-      mode: 'inline',
-    };
-
-    this.datos.splice(index + 1, 0, newRow);
+    if (this.once === true) {
+      const newRow: Bebida = {
+        brand: bebida.brand,
+        type: bebida.type,
+        sales: undefined,
+        count: undefined,
+        month: '',
+        isNew: true,
+        mode: 'inline',
+      };
+      this.datos.splice(index + 1, 0, newRow);
+      this.once = false;
+    }
   }
 
   addfirstRow() {
@@ -254,6 +258,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       next: () => {
         bebida.isNew = false;
         this.cargarDatos();
+        this.once = true;
       },
       error: () => {
         console.error('Error al crear bebida');
@@ -276,6 +281,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     if (bebida.isNew) {
       this.datos = this.datos.filter((b) => b !== bebida);
+      this.once = true;
     }
   }
 }

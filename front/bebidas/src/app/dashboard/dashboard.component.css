@@ -28,7 +28,7 @@
 .add-icon:hover {
   width: 25px;
   height: 50px;
-  color: #25c457;
+  color: #22c55e;
 }
 .add-icon {
   width: 25px;
@@ -41,7 +41,7 @@
   color: #3a3a3a;
 }
 .delete-icon:hover {
-  color: #ff0000;
+  color: #ef4444;
 }
 .new-row {
   background-color: bisque;
@@ -57,4 +57,12 @@
   cursor: pointer;
   opacity: 1;
   padding: 0;
+}
+
+.row-success {
+  border-left: 5px solid #22c55e;
+}
+
+.row-fail {
+  border-left: 5px solid #ef4444;
 }

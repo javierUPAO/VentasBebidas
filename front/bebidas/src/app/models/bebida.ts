@@ -5,5 +5,7 @@ export interface Bebida {
   count?: number;
   month?: string;
   isNew?: boolean;
+  goal?: number;
   mode?: 'first' | 'inline';
+  succes?: boolean;
 }

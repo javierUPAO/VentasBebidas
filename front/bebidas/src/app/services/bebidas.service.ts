@@ -31,6 +31,8 @@ query Bebidas(
       sales
       count
       month
+      goal
+      succes
     }
     total
     cantidad

@@ -26,6 +26,10 @@ jobs:
 
       - run: firebase --version
 
+      - run: ls
+
+      - run: pwd
+
       # Paso 3: Desplegar el proyecto en Firebase Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

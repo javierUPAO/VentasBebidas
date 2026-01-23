@@ -56,7 +56,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.filtros.brand = this.marca !== 'Todas' ? this.marca : null;
     this.bebidasService.obtenerBebidas(this.filtros).subscribe((res) => {
       this.datos = res.data.bebidas.result;
-      console.log(this.datos);
       this.total = res.data.bebidas.total;
       this.cantidad = res.data.bebidas.cantidad;
       this.crearGrafico(this.datos);
@@ -90,9 +89,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
         container.addShape('line', {
           attrs: {
-            x1: p.x - 100,
+            x1: p.x - 60,
             y1: p.y,
-            x2: p.x + 100,
+            x2: p.x + 60,
             y2: p.y,
             stroke: d.succes ? '#22c55e' : '#ef4444',
             lineWidth: 3,
@@ -201,6 +200,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       acc.sales += d.sales;
 
       acc.goal = Math.max(acc.goal, d.goal);
+      if (acc.sales >= acc.goal) {
+        d.succes = true;
+      }
     });
 
     return Array.from(map.values());
@@ -247,7 +249,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const key = `${bebida.id}-${field}`;
     const original = this.originalValues.get(key);
     const current = bebida[field];
-    console.log('key:' + key, 'original :' + original + 'current :' + current);
     const isSame =
       typeof original === 'number'
         ? Number(original) === Number(current)

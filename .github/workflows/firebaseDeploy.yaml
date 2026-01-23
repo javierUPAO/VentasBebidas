@@ -22,11 +22,7 @@ jobs:
 
       - run: npm install -g firebase-tools@7.16.2
 
-      # Paso 3: Desplegar el proyecto en Firebase Hosting
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: bebidas-5db80
-          channelId: live
-          entryPoint: front/bebidas
-          working-directory: front/bebidas
+      - run: firebase deploy --only hosting --project bebidas-5db80
+        working-directory: front/bebidas
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

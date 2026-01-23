@@ -1,0 +1,27 @@
+name: Deploy frontend to Firebase Hosting on push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Paso 1: Clonar el repositorio
+      - uses: actions/checkout@v4
+      - run: cd front/bebidas
+
+      # Paso 2: Instalar dependencias y construir el proyecto Angular
+      - run: npm install && npm run build --if-present
+        working-directory: front/bebidas
+
+      # Paso 3: Desplegar el proyecto en Firebase Hosting
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: bebidas-5db80
+          channelId: live
+          entryPoint: bebidas
+          working-directory: front/bebidas

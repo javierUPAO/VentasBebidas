@@ -74,11 +74,14 @@
             </tr>
           </thead>
           <tbody class="table-group-divider">
-            <tr class="" *ngFor="let bebida of datos; let i = index">
+            <tr
+              *ngFor="let bebida of datos; let i = index"
+              [ngClass]="getRowClass(bebida)"
+            >
               <td>
                 <ng-container
                   *ngIf="
-                    bebida.isNew && bebida.mode === 'first';
+                    (bebida.isNew && bebida.mode === 'first') || bebida.isNew;
                     else brandText
                   "
                 >
@@ -90,12 +93,22 @@
                 </ng-container>
 
                 <ng-template #brandText>
-                  <td class="text-center">{{ bebida.brand }}</td>
+                  <input
+                    class="form-control"
+                    [(ngModel)]="bebida.brand"
+                    (focus)="onFocus(bebida, 'brand')"
+                    (blur)="onBlur(bebida, 'brand')"
+                    (keydown.enter)="onEnter($event, bebida, 'brand')"
+                    (keydown.escape)="onCancelCreate(bebida)"
+                  />
                 </ng-template>
               </td>
               <td>
                 <ng-container
-                  *ngIf="bebida.isNew && bebida.mode === 'first'; else typeText"
+                  *ngIf="
+                    (bebida.isNew && bebida.mode === 'first') || bebida.isNew;
+                    else typeText
+                  "
                 >
                   <select
                     class="form-control new-row como-box"
@@ -112,7 +125,28 @@
                   <td class="text-center">{{ bebida.type }}</td>
                 </ng-template>
               </td>
-              <td>{{ bebida.goal }}</td>
+              <td class="text-center">
+                <ng-container *ngIf="bebida.isNew; else normalgoal">
+                  <input
+                    type="number"
+                    class="form-control new-row"
+                    [(ngModel)]="bebida.goal"
+                    required
+                    (keydown.escape)="onCancelCreate(bebida)"
+                  />
+                </ng-container>
+                <ng-template #normalgoal>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="bebida.goal"
+                    (focus)="onFocus(bebida, 'goal')"
+                    (blur)="onBlur(bebida, 'goal')"
+                    (keydown.enter)="onEnter($event, bebida, 'goal')"
+                    (keydown.escape)="onCancelCreate(bebida)"
+                  />
+                </ng-template>
+              </td>
               <td class="text-center">
                 <ng-container *ngIf="bebida.isNew; else normalSales">
                   <input

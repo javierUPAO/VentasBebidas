@@ -6,7 +6,7 @@ import { UpdateRequest } from '../models/update';
   providedIn: 'root',
 })
 export class BebidasService {
-  private url = 'http://localhost:4000/';
+  private url = 'https://ventasbebidas.onrender.com/';
 
   constructor(private http: HttpClient) {}
 

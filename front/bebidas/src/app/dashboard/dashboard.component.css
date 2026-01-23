@@ -21,24 +21,48 @@
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   padding: 0;
 }
 
-.icon {
+.add-icon:hover {
   width: 25px;
   height: 50px;
-  color: #25c457; /* gray-400 */
+  color: #22c55e;
 }
-
-.pruebahover:hover .add-btn {
-  opacity: 1;
+.add-icon {
+  width: 25px;
+  height: 50px;
+  color: #3a3a3a;
 }
-.pruebahover {
-  display: flex;
-  justify-items: center;
+.delete-icon {
+  width: 25px;
+  height: 50px;
+  color: #3a3a3a;
 }
-
+.delete-icon:hover {
+  color: #ef4444;
+}
 .new-row {
   background-color: bisque;
+}
+
+.combo-box {
+  min-width: 40px;
+  width: 100px;
+}
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 1;
+  padding: 0;
+}
+
+.row-success {
+  border-left: 5px solid #22c55e;
+}
+
+.row-fail {
+  border-left: 5px solid #ef4444;
 }

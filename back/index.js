@@ -1,6 +1,5 @@
 const { ApolloServer, gql } = require("apollo-server");
 const { db } = require("./firestoreConection");
-const admin = require("firebase-admin");
 const typeDefs = gql`
   type Bebida {
     id: ID!
@@ -9,6 +8,8 @@ const typeDefs = gql`
     sales: Int!
     count: Int!
     month: String!
+    goal: Int!
+    succes: Boolean!
   }
 
   type UpdateResponse {
@@ -37,6 +38,7 @@ const typeDefs = gql`
     sales: Int = 0
     count: Int = 0
     month: String! = "2026-01"
+    goal: Int = 0
   }
 
   input UpdateInput {
@@ -45,28 +47,17 @@ const typeDefs = gql`
     sales: Int
     count: Int
     month: String
+    goal: Int
   }
 
-  input SaleInput {
-    count: Int!
-    sales: Int!
-  }
-
-  type SaleResponse {
-    code: Int!
-    message: String!
-    succes: Boolean!
-    bebida: Bebida
-  }
   enum BeverageType {
-    WATER
-    COLA
+    Agua
+    Gaseosa
   }
   enum Sort {
     BRAND
     SALES
   }
-
   type FiltroResult {
     result: [Bebida]!
     total: Int!
@@ -88,8 +79,6 @@ const typeDefs = gql`
     deleteBebida(id: ID!): DeleteResponse
 
     updateBebida(id: ID!, input: UpdateInput!): UpdateResponse
-
-    addSale(id: ID!, input: SaleInput): SaleResponse
   }
 `;
 
@@ -117,9 +106,29 @@ const resolvers = {
 
       const snapshot = await query.get();
 
-      const result = snapshot.docs
+      const bebidas = snapshot.docs
         .map((d) => ({ id: d.id, ...d.data() }))
         .filter((b) => b.brand && b.type && b.sales !== undefined);
+
+      const grouped = {};
+
+      for (const b of bebidas) {
+        const key = `${b.brand}_${b.month}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            totalSales: 0,
+          };
+        }
+        grouped[key].totalSales += b.sales;
+      }
+
+      const result = bebidas.map((b) => {
+        const key = `${b.brand}_${b.month}`;
+        return {
+          ...b,
+          succes: grouped[key].totalSales >= b.goal,
+        };
+      });
 
       const total = result.reduce((sum, b) => sum + b.sales, 0);
 
@@ -130,6 +139,7 @@ const resolvers = {
       };
     },
   },
+
   Mutation: {
     addBebida: async (_, { input }) => {
       try {
@@ -141,6 +151,7 @@ const resolvers = {
           sales: input.sales,
           count: input.count,
           month: input.month,
+          goal: input.goal,
         };
 
         await ref.set({
@@ -150,6 +161,7 @@ const resolvers = {
           sales: bebida.sales,
           count: bebida.count,
           month: bebida.month,
+          goal: bebida.goal,
         });
 
         return {
@@ -215,6 +227,7 @@ const resolvers = {
           ...(input.sales !== undefined && { sales: input.sales }),
           ...(input.count !== undefined && { count: input.count }),
           ...(input.month !== undefined && { month: input.month }),
+          ...(input.goal !== undefined && { goal: input.goal }),
         });
 
         const updated = await ref.get();
@@ -232,41 +245,6 @@ const resolvers = {
         return {
           code: 200,
           message: "Error al actualizar bebida ",
-          succes: false,
-          bebida: null,
-        };
-      }
-    },
-    addSale: async (_, { id, input }) => {
-      try {
-        const ref = db.collection("bebidas").doc(id);
-        let salesToAdd = 0;
-        let countToAdd = 1;
-
-        if (typeof input.sales === "number") {
-          salesToAdd = input.sales;
-        }
-
-        if (typeof input.count === "number" && input.count > 0) {
-          countToAdd = input.count;
-        }
-        await ref.update({
-          sales: admin.firestore.FieldValue.increment(salesToAdd),
-          count: admin.firestore.FieldValue.increment(countToAdd),
-        });
-
-        const snap = await ref.get();
-
-        return {
-          code: 200,
-          succes: true,
-          message: "Venta registrada",
-          bebida: snap.data(),
-        };
-      } catch (error) {
-        return {
-          code: 500,
-          message: "Error al registrar la venta " + error,
           succes: false,
           bebida: null,
         };

@@ -6,7 +6,7 @@ import { UpdateRequest } from '../models/update';
   providedIn: 'root',
 })
 export class BebidasService {
-  private url = 'http://localhost:4000/';
+  private url = 'https://ventasbebidas.onrender.com/';
 
   constructor(private http: HttpClient) {}
 
@@ -31,6 +31,8 @@ query Bebidas(
       sales
       count
       month
+      goal
+      succes
     }
     total
     cantidad
@@ -80,7 +82,6 @@ query Bebidas(
       updateBebidaId,
       input,
     };
-    console.log(variables);
     return this.http.post<any>(this.url, {
       query,
       variables,
@@ -105,6 +106,18 @@ query Bebidas(
     return this.http.post<any>(this.url, {
       query,
       variables: { input },
+    });
+  }
+
+  borrarBebida(deleteBebidaId: any) {
+    const query = `mutation Mutation($deleteBebidaId: ID!) {
+                    deleteBebida(id: $deleteBebidaId) {
+                      message
+                    }
+                    }`;
+    return this.http.post<number>(this.url, {
+      query,
+      variables: { deleteBebidaId },
     });
   }
 }

@@ -4,5 +4,8 @@ export interface Bebida {
   sales?: number;
   count?: number;
   month?: string;
-  isNew?: boolean; // 🔥 clave
+  isNew?: boolean;
+  goal?: number;
+  mode?: 'first' | 'inline';
+  succes?: boolean;
 }

@@ -60,9 +60,9 @@
 }
 
 .row-success {
-  border-left: 5px solid #22c55e;
+  background-color: #22c55e2a;
 }
 
 .row-fail {
-  border-left: 5px solid #ef4444;
+  background-color: #ef44442e;
 }

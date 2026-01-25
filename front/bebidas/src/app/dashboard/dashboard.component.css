@@ -48,8 +48,44 @@
 
 .row-success {
   background-color: #22c55e2a;
+  padding: 0%;
 }
 
 .row-fail {
   background-color: #ef44442e;
+  padding: 0%;
+}
+
+.row-0pading {
+  padding: 0%;
+}
+.forminput {
+  width: 73.18px;
+  height: 40px !important;
+  padding: 0%;
+  margin: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-align: center;
+  box-shadow: none;
+}
+
+.forminput:focus,
+.forminput:hover,
+.forminput:active {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.forminput::-webkit-inner-spin-button,
+.forminput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.forminput[type="number"] {
+  -moz-appearance: textfield;
 }

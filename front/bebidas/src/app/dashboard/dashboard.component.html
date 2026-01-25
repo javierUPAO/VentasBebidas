@@ -8,7 +8,7 @@
 <div class="container">
   <div class="row mt-4 mb-4">
     <div class="col-12 mt-4 mb-4">
-      <h4 class="text-center mb-3 fs-2">Ventas por Marca y Tipo</h4>
+      <h4 class="text-center mb-3 fs-2">Ventas de bebidas</h4>
       <ng-container *ngIf="lineas === false; else lineasGrafico">
         <div id="container" style="height: 400px"></div>
       </ng-container>
@@ -104,20 +104,68 @@
           <tbody class="table-group-divider">
             <tr class="text-center">
               <td>Ventas</td>
-              <td
-                *ngFor="let v of salesByMonth; let i = index"
-                [ngClass]="getGoalStatus(i)"
-              >
-                {{ v }}
-              </td>
+              <ng-container *ngIf="marca === 'Todas'; else inputVentas">
+                <td
+                  *ngFor="let v of salesByMonth; let i = index"
+                  [ngClass]="getGoalStatus(i)"
+                >
+                  {{ v }}
+                </td>
+              </ng-container>
+              <ng-template #inputVentas>
+                <td
+                  *ngFor="let bebida of datos; let i = index"
+                  [ngClass]="getGoalStatus(i)"
+                >
+                  <input
+                    type="number"
+                    class="forminput"
+                    [(ngModel)]="bebida.sales"
+                    (focus)="onFocus(bebida, 'sales')"
+                    (blur)="onBlur(bebida, 'sales')"
+                    (keydown.enter)="onEnter($event, bebida, 'sales')"
+                    (keydown.escape)="onCancelCreate(bebida)"
+                  />
+                </td>
+              </ng-template>
             </tr>
             <tr class="text-center">
               <td>Meta</td>
-              <td *ngFor="let m of goalByMonth">{{ m }}</td>
+              <ng-container *ngIf="marca === 'Todas'; else inputMeta">
+                <td *ngFor="let m of goalByMonth">{{ m }}</td>
+              </ng-container>
+              <ng-template #inputMeta>
+                <td *ngFor="let bebida of datos" [ngClass]="pading0()">
+                  <input
+                    type="number"
+                    class="forminput"
+                    [(ngModel)]="bebida.goal"
+                    (focus)="onFocus(bebida, 'goal')"
+                    (blur)="onBlur(bebida, 'goal')"
+                    (keydown.enter)="onEnter($event, bebida, 'goal')"
+                    (keydown.escape)="onCancelCreate(bebida)"
+                  />
+                </td>
+              </ng-template>
             </tr>
             <tr class="text-center">
               <td>Cantidad</td>
-              <td *ngFor="let c of countByMonth">{{ c }}</td>
+              <ng-container *ngIf="marca === 'Todas'; else inputCantidad">
+                <td *ngFor="let c of countByMonth">{{ c }}</td>
+              </ng-container>
+              <ng-template #inputCantidad>
+                <td *ngFor="let bebida of datos" [ngClass]="pading0()">
+                  <input
+                    type="number"
+                    class="forminput"
+                    [(ngModel)]="bebida.count"
+                    (focus)="onFocus(bebida, 'count')"
+                    (blur)="onBlur(bebida, 'count')"
+                    (keydown.enter)="onEnter($event, bebida, 'count')"
+                    (keydown.escape)="onCancelCreate(bebida)"
+                  />
+                </td>
+              </ng-template>
             </tr>
           </tbody>
           <tfoot></tfoot>

@@ -7,10 +7,19 @@
 </nav>
 <div class="container">
   <div class="row mt-4 mb-4">
+    <div class="col-12 mt-4 mb-4">
+      <h4 class="text-center mb-3 fs-2">Ventas por Marca y Tipo</h4>
+      <ng-container *ngIf="lineas === false; else lineasGrafico">
+        <div id="container" style="height: 400px"></div>
+      </ng-container>
+      <ng-template #lineasGrafico>
+        <div id="lineasContainer" style="height: 400px"></div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="row">
     <div class="col-3 mt-4 mb-4">
-      <h2 class="text-decoration-underline link-underline-dark fs-1">
-        Filtrar
-      </h2>
       <!-- Tipo Bebida -->
       <div class="mb-3">
         <label class="form-label fw-bold">Tipo Bebida</label>
@@ -41,301 +50,78 @@
         </select>
       </div>
     </div>
-
     <div class="col-9 mt-4 mb-4">
-      <h4 class="text-center mb-3 fs-2">Ventas por Marca y Tipo</h4>
-      <div id="container" style="height: 400px"></div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-3 mb-3">
-      <div class="row mb-3">
-        <div class="h2">Ventas Totales : {{ total }}</div>
+      <div class="row mb-4">
+        <div
+          class="d-flex justify-content-center gap-4 align-items-center legend"
+        >
+          <ng-container *ngIf="marca !== 'Todas'">
+            <picture>
+              <img [src]="getLogo(marca)" />
+            </picture>
+          </ng-container>
+
+          <div class="d-flex align-items-center gap-2">
+            <svg class="icon success" viewBox="0 0 24 24">
+              <path
+                d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z"
+              />
+            </svg>
+            <span>Meta Completada</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <svg class="icon fail" viewBox="0 0 24 24">
+              <path
+                d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z"
+              />
+            </svg>
+            <span>Meta Incompleta</span>
+          </div>
+        </div>
       </div>
-      <div class="row mb-3">
-        <div class="h2">Total Registros :{{ cantidad }}</div>
-      </div>
-    </div>
-    <div class="col-9">
       <div class="table-responsive">
         <table
           class="table table-striped table-hover table-borderless align-middle"
         >
           <thead class="table-light">
             <tr class="text-center">
-              <th class="px-4">Marca</th>
-              <th class="px-4">Tipo</th>
-              <th class="px-4">Meta</th>
-              <th>Ventas</th>
-              <th>Cantidad</th>
-              <th>Fecha</th>
-              <th></th>
-              <th></th>
+              <th>Indicador</th>
+              <th>ENE</th>
+              <th>FEB</th>
+              <th>MAR</th>
+              <th>ABR</th>
+              <th>MAY</th>
+              <th>JUN</th>
+              <th>JUL</th>
+              <th>AGO</th>
+              <th>SEP</th>
+              <th>OCT</th>
+              <th>NOV</th>
+              <th>DIC</th>
             </tr>
           </thead>
           <tbody class="table-group-divider">
-            <tr
-              *ngFor="let bebida of datos; let i = index"
-              [ngClass]="getRowClass(bebida)"
-            >
-              <td>
-                <ng-container
-                  *ngIf="
-                    (bebida.isNew && bebida.mode === 'first') || bebida.isNew;
-                    else brandText
-                  "
-                >
-                  <input
-                    class="form-control new-row"
-                    [(ngModel)]="bebida.brand"
-                    required
-                  />
-                </ng-container>
-
-                <ng-template #brandText>
-                  <input
-                    class="form-control"
-                    [(ngModel)]="bebida.brand"
-                    (focus)="onFocus(bebida, 'brand')"
-                    (blur)="onBlur(bebida, 'brand')"
-                    (keydown.enter)="onEnter($event, bebida, 'brand')"
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-template>
-              </td>
-              <td>
-                <ng-container
-                  *ngIf="
-                    (bebida.isNew && bebida.mode === 'first') || bebida.isNew;
-                    else typeText
-                  "
-                >
-                  <select
-                    class="form-control new-row como-box"
-                    [(ngModel)]="bebida.type"
-                    required
-                  >
-                    <option value=""></option>
-                    <option value="Agua">Agua</option>
-                    <option value="Gaseosa">Gaseosa</option>
-                  </select>
-                </ng-container>
-
-                <ng-template #typeText>
-                  <td class="text-center">{{ bebida.type }}</td>
-                </ng-template>
-              </td>
-              <td class="text-center">
-                <ng-container *ngIf="bebida.isNew; else normalgoal">
-                  <input
-                    type="number"
-                    class="form-control new-row"
-                    [(ngModel)]="bebida.goal"
-                    required
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-container>
-                <ng-template #normalgoal>
-                  <input
-                    type="number"
-                    class="form-control"
-                    [(ngModel)]="bebida.goal"
-                    (focus)="onFocus(bebida, 'goal')"
-                    (blur)="onBlur(bebida, 'goal')"
-                    (keydown.enter)="onEnter($event, bebida, 'goal')"
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-template>
-              </td>
-              <td class="text-center">
-                <ng-container *ngIf="bebida.isNew; else normalSales">
-                  <input
-                    type="number"
-                    class="form-control new-row"
-                    [(ngModel)]="bebida.sales"
-                    required
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-container>
-                <ng-template #normalSales>
-                  <input
-                    type="number"
-                    class="form-control"
-                    [(ngModel)]="bebida.sales"
-                    (focus)="onFocus(bebida, 'sales')"
-                    (blur)="onBlur(bebida, 'sales')"
-                    (keydown.enter)="onEnter($event, bebida, 'sales')"
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-template>
-              </td>
-              <td>
-                <ng-container *ngIf="bebida.isNew; else normalCount">
-                  <input
-                    type="number"
-                    class="form-control new-row"
-                    [(ngModel)]="bebida.count"
-                    required
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-container>
-                <ng-template #normalCount>
-                  <input
-                    type="number"
-                    class="form-control"
-                    [(ngModel)]="bebida.count"
-                    (focus)="onFocus(bebida, 'count')"
-                    (blur)="onBlur(bebida, 'count')"
-                    (keydown.enter)="onEnter($event, bebida, 'count')"
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-template>
-              </td>
-
-              <td>
-                <ng-container *ngIf="bebida.isNew; else normalMonth">
-                  <input
-                    class="form-control new-row"
-                    [(ngModel)]="bebida.month"
-                    placeholder="YYYY/MM"
-                    (keydown.enter)="onCreateEnter($event, bebida)"
-                    (keydown.escape)="onCancelCreate(bebida)"
-                    required
-                  />
-                </ng-container>
-
-                <ng-template #normalMonth>
-                  <input
-                    class="form-control"
-                    [(ngModel)]="bebida.month"
-                    (focus)="onFocus(bebida, 'month')"
-                    (blur)="onBlur(bebida, 'month')"
-                    (keydown.enter)="onEnter($event, bebida, 'month')"
-                    (keydown.escape)="onCancelCreate(bebida)"
-                  />
-                </ng-template>
-              </td>
-              <td class="add-container">
-                <ng-container *ngIf="bebida.isNew; else normalAdd">
-                  <button class="delete-btn" (click)="onCancelCreate(bebida)">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="delete-icon"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 18 18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </ng-container>
-                <ng-template #normalAdd>
-                  <button class="add-btn" (click)="addRow(bebida, i)">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="add-icon"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 4.5v15m7.5-7.5h-15"
-                      />
-                    </svg>
-                  </button>
-                </ng-template>
-              </td>
-              <td class="delete-container">
-                <ng-container *ngIf="bebida.isNew; else normalDelete">
-                </ng-container>
-                <ng-template #normalDelete>
-                  <button
-                    class="delete-btn"
-                    (click)="openDeleteModal(bebida.id)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="delete-icon"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                      />
-                    </svg>
-                  </button>
-                </ng-template>
+            <tr class="text-center">
+              <td>Ventas</td>
+              <td
+                *ngFor="let v of salesByMonth; let i = index"
+                [ngClass]="getGoalStatus(i)"
+              >
+                {{ v }}
               </td>
             </tr>
-
-            <tr *ngIf="datos.length === 0">
-              <td colspan="7" class="text-center">
-                No hay bebidas para mostrar
-              </td>
-              <td class="pruebahover">
-                <button class="add-btn" (click)="addfirstRow()">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="add-icon"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
-                </button>
-              </td>
+            <tr class="text-center">
+              <td>Meta</td>
+              <td *ngFor="let m of goalByMonth">{{ m }}</td>
+            </tr>
+            <tr class="text-center">
+              <td>Cantidad</td>
+              <td *ngFor="let c of countByMonth">{{ c }}</td>
             </tr>
           </tbody>
           <tfoot></tfoot>
         </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Confirmación -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirmar eliminación</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-        ></button>
-      </div>
-
-      <div class="modal-body">
-        ¿Estás seguro de que deseas eliminar esta bebida?
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Cancelar
-        </button>
-
-        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
-          Eliminar
-        </button>
       </div>
     </div>
   </div>

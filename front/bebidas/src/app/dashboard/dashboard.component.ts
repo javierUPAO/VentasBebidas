@@ -1,5 +1,10 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { Column } from '@antv/g2plot';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { Column, Line } from '@antv/g2plot';
 import { FirebaseAuthService } from '../Guards/firebase-auth.service';
 import { Router } from '@angular/router';
 import { BebidasService } from '../services/bebidas.service';
@@ -16,19 +21,45 @@ declare const bootstrap: any;
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
   chart!: Column;
+  linechart!: Line;
+  lineas: boolean = true;
   tipoBebida: string = 'Todas';
   marca: string = 'Todas';
   total: number = 0;
   cantidad: number = 0;
   pendingUpdates = new Set<string>();
   deleteId!: string;
-  modal!: any;
-  once: boolean;
+  months = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+
+  logosBebidas = [
+    { marca: 'Pepsi', url: 'https://i.imgur.com/PpFpOKM.png' },
+    { marca: 'Coca Cola', url: 'https://i.imgur.com/0LAfuZY.png' },
+    { marca: 'San Luis', url: 'https://i.imgur.com/7c7rCbV.png' },
+    { marca: 'San Mateo', url: 'https://i.imgur.com/i4H9Q62.png' },
+  ];
+
+  salesByMonth: number[] = new Array(12).fill(0);
+  countByMonth: number[] = new Array(12).fill(0);
+  goalByMonth: number[] = new Array(12).fill(0);
+  metaStatus: boolean[] = [];
   constructor(
     private auth: FirebaseAuthService,
     private router: Router,
     private bebidasService: BebidasService,
-    private toast: ToastService,
+    private cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {}
@@ -51,6 +82,26 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.cargarDatos();
   }
 
+  mostrarDataGeneral() {
+    const sales = new Array(12).fill(0);
+    const count = new Array(12).fill(0);
+    const goal = new Array(12).fill(0);
+
+    this.datos.forEach((item) => {
+      const index = this.months.indexOf(item.month);
+      if (index !== -1) {
+        sales[index] += item.sales;
+        count[index] += item.count;
+        goal[index] += item.goal;
+      }
+    });
+
+    this.salesByMonth = sales;
+    this.countByMonth = count;
+    this.goalByMonth = goal;
+    this.metaStatus = this.salesByMonth.map((v, i) => v >= this.goalByMonth[i]);
+  }
+
   cargarDatos() {
     this.filtros.type = this.mapTipo(this.tipoBebida);
     this.filtros.brand = this.marca !== 'Todas' ? this.marca : null;
@@ -58,9 +109,24 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.datos = res.data.bebidas.result;
       this.total = res.data.bebidas.total;
       this.cantidad = res.data.bebidas.cantidad;
-      this.crearGrafico(this.datos);
+      this.mostrarDataGeneral();
+      this.evaluarTipoGrafico();
     });
-    this.once = true;
+  }
+  getLogo(marca: string) {
+    return this.logosBebidas.find((l) => l.marca === marca)?.url;
+  }
+
+  evaluarTipoGrafico(): void {
+    if (this.marca === 'Todas') {
+      this.lineas = true;
+      this.cd.detectChanges();
+      this.crearGraficoLineas(this.datos);
+    } else {
+      this.lineas = false;
+      this.cd.detectChanges();
+      this.crearGrafico(this.datos);
+    }
   }
 
   crearGrafico(data: Bebida[]): void {
@@ -142,6 +208,35 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.chart.render();
   }
 
+  crearGraficoLineas(data: Bebida[]): void {
+    if (this.linechart) this.linechart.destroy();
+
+    const chartData = this.agruparPorMarcaYMes(data);
+
+    this.linechart = new Line('lineasContainer', {
+      data: chartData,
+      xField: 'month',
+      yField: 'sales',
+      seriesField: 'brand',
+      padding: 'auto',
+      point: {
+        size: 6,
+        shape: 'circle',
+      },
+      legend: {
+        position: 'top',
+      },
+      smooth: true,
+      animation: {
+        appear: {
+          duration: 4500,
+        },
+      },
+    });
+
+    this.linechart.render();
+  }
+
   aplicarFiltros(): void {
     this.cargarDatos();
   }
@@ -150,6 +245,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (tipo === 'Aguas') return 'Agua';
     if (tipo === 'Gaseosas') return 'Gaseosa';
     return null;
+  }
+  getGoalStatus(i: number) {
+    return this.metaStatus[i] ? 'row-success' : 'row-fail';
   }
 
   cargarMarcasPorTipo(tipo: string | null) {
@@ -170,7 +268,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   onTipoChange(tipo: string) {
     this.tipoBebida = tipo;
     this.marca = 'Todas';
-
+    this.lineas = true;
     const tipoEnum = this.mapTipo(tipo);
 
     this.cargarMarcasPorTipo(tipoEnum);
@@ -180,6 +278,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   onMarcaChange(marca: string) {
     this.marca = marca;
+    this.lineas = false;
     this.cargarDatos();
   }
 
@@ -209,6 +308,20 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   agruparPorMes(data: any[]) {
     const map = new Map<string, any>();
+    const ordenMes: any = {
+      Enero: 1,
+      Febrero: 2,
+      Marzo: 3,
+      Abril: 4,
+      Mayo: 5,
+      Junio: 6,
+      Julio: 7,
+      Agosto: 8,
+      Septiembre: 9,
+      Octubre: 10,
+      Noviembre: 11,
+      Diciembre: 12,
+    };
 
     data.forEach((b) => {
       if (!map.has(b.month)) {
@@ -226,9 +339,32 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       acc.goal = Math.max(acc.goal, b.goal);
     });
 
-    return Array.from(map.values()).sort((a, b) =>
-      a.month.localeCompare(b.month),
+    return Array.from(map.values()).sort(
+      (a, b) => ordenMes[a.month] - ordenMes[b.month],
     );
+  }
+
+  agruparPorMarcaYMes(data: Bebida[]) {
+    const meses = this.months;
+    const marcas = [...new Set(data.map((d) => d.brand))];
+
+    const resultado: any[] = [];
+
+    marcas.forEach((brand) => {
+      meses.forEach((month) => {
+        const total = data
+          .filter((d) => d.brand === brand && d.month === month)
+          .reduce((sum, d) => sum + d.sales, 0);
+
+        resultado.push({
+          brand,
+          month,
+          sales: total,
+        });
+      });
+    });
+
+    return resultado;
   }
 
   originalValues = new Map<string, any>();
@@ -277,112 +413,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
-  addRow(bebida: Bebida, index: number) {
-    if (this.once === true) {
-      const newRow: Bebida = {
-        brand: bebida.brand,
-        type: bebida.type,
-        sales: undefined,
-        count: undefined,
-        month: '',
-        isNew: true,
-        mode: 'inline',
-        goal: undefined,
-      };
-      this.datos.splice(index + 1, 0, newRow);
-      this.once = false;
-    }
-  }
-
-  addfirstRow() {
-    const newRow: Bebida = {
-      brand: '',
-      type: '',
-      sales: undefined,
-      count: undefined,
-      month: '',
-      isNew: true,
-      mode: 'first',
-      goal: undefined,
-    };
-
-    this.datos = [newRow];
-  }
-
-  openDeleteModal(id: string) {
-    this.deleteId = id;
-    const modalEl = document.getElementById('deleteModal');
-    this.modal = new bootstrap.Modal(modalEl);
-    this.modal.show();
-  }
-
-  confirmDelete() {
-    this.bebidasService.borrarBebida(this.deleteId).subscribe({
-      next: (res: any) => {
-        this.modal.hide();
-        this.cargarDatos();
-        this.onTipoChange('Todas');
-        this.toast.show(res.data.deleteBebida.message, 'success');
-      },
-      error: (err) => {
-        this.toast.show('Error al eliminar bebida', 'error');
-      },
-    });
-  }
-
-  checkCreate(bebida: Bebida) {
-    if (
-      bebida.sales == null ||
-      bebida.count == null ||
-      !bebida.month ||
-      !bebida.brand ||
-      !bebida.type ||
-      bebida.goal == null
-    ) {
-      return;
-    }
-
-    if (!bebida.isNew) return;
-
-    const input = {
-      brand: bebida.brand,
-      type: bebida.type,
-      sales: bebida.sales,
-      count: bebida.count,
-      month: bebida.month,
-      goal: bebida.goal,
-    };
-
-    this.bebidasService.crearBebida(input).subscribe({
-      next: () => {
-        bebida.isNew = false;
-        this.cargarDatos();
-        this.onTipoChange('Todas');
-        this.once = true;
-      },
-      error: () => {
-        console.error('Error al crear bebida');
-      },
-    });
-  }
-
   focusNext(event: KeyboardEvent, next: HTMLInputElement) {
     event.preventDefault();
     next.focus();
-  }
-
-  onCreateEnter(event: KeyboardEvent, bebida: Bebida) {
-    event.preventDefault();
-    this.checkCreate(bebida);
-  }
-
-  onCancelCreate(bebida: Bebida, event?: KeyboardEvent) {
-    event?.preventDefault();
-
-    if (bebida.isNew) {
-      this.datos = this.datos.filter((b) => b !== bebida);
-      this.once = true;
-    }
   }
 
   getRowClass(bebida: any) {

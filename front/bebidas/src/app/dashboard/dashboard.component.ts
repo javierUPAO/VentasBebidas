@@ -44,6 +44,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     'Diciembre',
   ];
 
+  logosBebidas = [
+    { marca: 'Pepsi', url: 'https://i.imgur.com/PpFpOKM.png' },
+    { marca: 'Coca Cola', url: 'https://i.imgur.com/0LAfuZY.png' },
+    { marca: 'San Luis', url: 'https://i.imgur.com/7c7rCbV.png' },
+    { marca: 'San Mateo', url: 'https://i.imgur.com/i4H9Q62.png' },
+  ];
+
   salesByMonth: number[] = new Array(12).fill(0);
   countByMonth: number[] = new Array(12).fill(0);
   goalByMonth: number[] = new Array(12).fill(0);
@@ -105,6 +112,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.mostrarDataGeneral();
       this.evaluarTipoGrafico();
     });
+  }
+  getLogo(marca: string) {
+    return this.logosBebidas.find((l) => l.marca === marca)?.url;
   }
 
   evaluarTipoGrafico(): void {

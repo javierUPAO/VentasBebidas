@@ -106,7 +106,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.filtros.type = this.mapTipo(this.tipoBebida);
     this.filtros.brand = this.marca !== 'Todas' ? this.marca : null;
     this.bebidasService.obtenerBebidas(this.filtros).subscribe((res) => {
-      this.datos = res.data.bebidas.result;
+      this.datos = res.data.bebidas.result.sort(
+        (a, b) => this.months.indexOf(a.month) - this.months.indexOf(b.month),
+      );
       this.total = res.data.bebidas.total;
       this.cantidad = res.data.bebidas.cantidad;
       this.mostrarDataGeneral();
@@ -155,9 +157,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
         container.addShape('line', {
           attrs: {
-            x1: p.x - 60,
+            x1: p.x - 30,
             y1: p.y,
-            x2: p.x + 60,
+            x2: p.x + 30,
             y2: p.y,
             stroke: d.succes ? '#22c55e' : '#ef4444',
             lineWidth: 3,
@@ -248,6 +250,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   getGoalStatus(i: number) {
     return this.metaStatus[i] ? 'row-success' : 'row-fail';
+  }
+  pading0() {
+    return 'row-0pading';
   }
 
   cargarMarcasPorTipo(tipo: string | null) {
@@ -391,7 +396,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         : original === current;
     if (current === null) return;
     if (isSame) return;
-
+    console.log(`Updating ${key} from ${original} to ${current}`);
     if (this.pendingUpdates.has(key)) return;
 
     this.pendingUpdates.add(key);
@@ -401,7 +406,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.bebidasService.actualizarBebida(bebida.id, input).subscribe({
       next: () => {
         this.cargarDatos();
-        this.onTipoChange('Todas');
       },
       error: () => {
         bebida[field] = original;
@@ -420,5 +424,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   getRowClass(bebida: any) {
     return bebida.succes ? 'row-success' : 'row-fail';
+  }
+  onCancelCreate(bebida: Bebida, event?: KeyboardEvent) {
+    event?.preventDefault();
+
+    if (bebida.isNew) {
+      this.datos = this.datos.filter((b) => b !== bebida);
+    }
   }
 }

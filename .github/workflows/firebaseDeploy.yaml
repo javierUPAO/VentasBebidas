@@ -22,7 +22,7 @@ jobs:
         working-directory: front/bebidas
 
       # Paso 4: Construir el proyecto Angular
-      - run: npm run build --if-present
+      - run: npm run build --prod --if-present
         working-directory: front/bebidas
 
       # Paso 5: Instalar firebase cli

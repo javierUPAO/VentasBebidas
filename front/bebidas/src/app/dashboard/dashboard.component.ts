@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   cantidad: number = 0;
   pendingUpdates = new Set<string>();
   deleteId!: string;
+  totalBebidasVendidas: number = 0;
   months = [
     'Enero',
     'Febrero',
@@ -98,6 +99,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.salesByMonth = sales;
     this.countByMonth = count;
     this.goalByMonth = goal;
+    this.totalBebidasVendidas = count.reduce((sum, c) => sum + c, 0);
+    console.log(this.totalBebidasVendidas);
     this.metaStatus = this.salesByMonth.map((v, i) => v >= this.goalByMonth[i]);
   }
 

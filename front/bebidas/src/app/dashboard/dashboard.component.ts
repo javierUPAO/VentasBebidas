@@ -135,9 +135,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     if (this.chart) this.chart.destroy();
 
-    const chartData = hayMarca
-      ? this.agruparPorMes(data)
-      : this.agruparPorMarca(data);
+    const chartData = this.agruparPorMes(data);
 
     const maxY =
       Math.max(...chartData.map((d) => Math.max(d.sales, d.goal))) * 1.15;
@@ -286,30 +284,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.cargarDatos();
   }
 
-  agruparPorMarca(data: Bebida[]) {
-    const map = new Map<string, any>();
-
-    data.forEach((d) => {
-      if (!map.has(d.brand)) {
-        map.set(d.brand, {
-          brand: d.brand,
-          sales: 0,
-          goal: d.goal,
-          succes: d.succes,
-        });
-      }
-
-      const acc = map.get(d.brand);
-      acc.sales += d.sales;
-
-      acc.goal = Math.max(acc.goal, d.goal);
-      if (acc.sales >= acc.goal) {
-        d.succes = true;
-      }
-    });
-
-    return Array.from(map.values());
-  }
   agruparPorMes(data: any[]) {
     const map = new Map<string, any>();
     const ordenMes: any = {
@@ -472,11 +446,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.cargarDatos();
       },
     });
-  }
-
-  focusNext(event: KeyboardEvent, next: HTMLInputElement) {
-    event.preventDefault();
-    next.focus();
   }
 
   getRowClass(bebida: any) {

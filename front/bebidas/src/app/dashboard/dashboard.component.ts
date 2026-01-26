@@ -10,9 +10,8 @@ import { Router } from '@angular/router';
 import { BebidasService } from '../services/bebidas.service';
 import { UpdateRequest } from '../models/update';
 import { Bebida } from '../models/bebida';
-import { ToastService } from '../services/toast.service';
-import { DualAxes } from '@antv/g2plot';
-import { anonOperationNotAloneMessage } from 'graphql/validation/rules/LoneAnonymousOperation';
+import ExcelJS from 'exceljs/dist/exceljs.min.js';
+import { saveAs } from 'file-saver';
 declare const bootstrap: any;
 @Component({
   selector: 'app-dashboard',
@@ -385,6 +384,64 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     event.preventDefault();
     (event.target as HTMLElement).blur();
   }
+  async exportToExcel() {
+    const headers = [
+      'Indicador',
+      'ENE',
+      'FEB',
+      'MAR',
+      'ABR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DIC',
+    ];
+
+    const ventas = this.salesByMonth;
+    const metas = this.goalByMonth;
+    const cant = this.countByMonth;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Reporte');
+
+    sheet.addRow(headers);
+    sheet.addRow(['Ventas', ...ventas]);
+    sheet.addRow(['Meta', ...metas]);
+    sheet.addRow(['Cantidad', ...cant]);
+
+    sheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    for (let i = 0; i < ventas.length; i++) {
+      const cell = sheet.getRow(2).getCell(i + 2);
+      const cumplio = ventas[i] >= metas[i];
+
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: {
+          argb: cumplio ? 'FFC6EFCE' : 'FFFFC7CE',
+        },
+      };
+
+      cell.font = {
+        color: {
+          argb: cumplio ? 'FF006100' : 'FF9C0006',
+        },
+      };
+    }
+
+    sheet.columns.forEach((col) => (col.width = 14));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), 'ventas-bebidas.xlsx');
+  }
 
   checkAndUpdate(bebida: any, field: string) {
     const key = `${bebida.id}-${field}`;
@@ -396,7 +453,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         : original === current;
     if (current === null) return;
     if (isSame) return;
-    console.log(`Updating ${key} from ${original} to ${current}`);
+    if (current < 0) return; // Evitar valores negativos
     if (this.pendingUpdates.has(key)) return;
 
     this.pendingUpdates.add(key);

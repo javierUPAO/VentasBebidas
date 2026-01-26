@@ -389,6 +389,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     sheet.addRow(['Ventas', ...ventas]);
     sheet.addRow(['Meta', ...metas]);
     sheet.addRow(['Cantidad', ...cant]);
+    sheet.addRow(['Cantidad total', this.totalBebidasVendidas]);
+    sheet.addRow(['Ventas totales', this.total]);
 
     sheet.getRow(1).eachCell((cell) => {
       cell.font = { bold: true };
